@@ -1,4 +1,4 @@
-USE [IdentityDb]
+USE [identity]
 GO
 /****** Object:  Table [dbo].[AspNetRoleClaims]    Script Date: 08-06-2023 18:00:53 ******/
 SET ANSI_NULLS ON
