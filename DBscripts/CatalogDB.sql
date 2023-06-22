@@ -1,4 +1,4 @@
-USE [CatalogDb]
+USE [catalog]
 GO
 /****** Object:  Table [dbo].[BasketItems]    Script Date: 08-06-2023 18:00:06 ******/
 SET ANSI_NULLS ON
