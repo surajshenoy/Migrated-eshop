@@ -13,10 +13,7 @@
     },
     "eshop_DBPassword": {
       "value": "P2ssw0rd"
-    },
-    "eshop_DBPasswordForTest": {
-      "value": "P2ssw0rd"
-    },
+    },    
     "eshop_DBName_catalog": {
       "value": "CatalogDB"
     },
