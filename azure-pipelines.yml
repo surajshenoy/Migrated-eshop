@@ -1,7 +1,8 @@
 trigger: none
 
 pool:
-  vmImage: windows-latest
+  #vmImage: windows-latest
+  name: 'MyLap'
 
 variables:
   eshop_ServerName: 'Learning321487'
