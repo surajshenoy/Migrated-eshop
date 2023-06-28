@@ -60,9 +60,12 @@ stages:
     jobs:
      - job: 'Creating_Infra'
        steps:
-        - task: AzureResourceGroupDeployment@2
-          displayName: 'ARM Template deployment: Resource Group scope'
-          inputs:
+       - download: current
+         artifact: drop
+
+       - task: AzureResourceGroupDeployment@2
+         displayName: 'ARM Template deployment: Resource Group scope'
+         inputs:
             azureSubscription: 'Visual Studio Enterprise Subscription – MPN (b6f408e9-b240-412d-b83d-1ec4fc938ee8)'
             resourceGroupName: '$(eshop_ServerName)'
             location: 'Southeast Asia'
@@ -71,17 +74,26 @@ stages:
             overrideParameters: '-WebsiteName $(WebsiteName) -eshop_ServerName $(eshop_ServerName)'
         
      - job: 'AppService_Deployment'
+       dependsOn:
+         - Creating_Infra
        steps:
-         - task: AzureWebApp@1
-           displayName: 'Azure Web App Deploy: eshop1a2b'
-           inputs:
-            azureSubscription: 'Visual Studio Enterprise Subscription – MPN (b6f408e9-b240-412d-b83d-1ec4fc938ee8)'
-            appType: webApp
-            appName: eshop1a2b
-            package: '$(System.DefaultWorkingDirectory)/_eShoponweb-ASP.NET Core-CI/drop/Web.zip'
+       - download: current
+         artifact: drop
+      
+       - task: AzureWebApp@1
+         displayName: 'Azure Web App Deploy: eshop1a2b'
+         inputs:
+           azureSubscription: 'Visual Studio Enterprise Subscription – MPN (b6f408e9-b240-412d-b83d-1ec4fc938ee8)'
+           appType: webApp
+           appName: eshop1a2b
+           package: '$(System.DefaultWorkingDirectory)/_eShoponweb-ASP.NET Core-CI/drop/Web.zip'
       
      - job: 'Database_Deployment'
+       dependsOn:
+         - AppService_Deployment
        steps:
+       - download: current
+         artifact: drop
        - task: SqlAzureDacpacDeployment@1
          displayName: 'Azure SQL SqlTask'
          inputs:
