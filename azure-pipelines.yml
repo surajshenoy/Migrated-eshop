@@ -48,12 +48,31 @@ stages:
                 publishWebProjects: True
                 arguments: '--configuration $(BuildConfiguration) --output $(build.artifactstagingdirectory)'
                 zipAfterPublish: True
-
+            
+            - task: CopyFiles@2
+              displayName: 'Copy Files to: $(build.artifactstagingdirectory)'
+              inputs:
+                SourceFolder: DBscripts/
+                Contents: |
+                  CatalogDB.sql
+                  IdentityDB.sql
+                TargetFolder: '$(build.artifactstagingdirectory)'
+            
+            - task: CopyFiles@2
+              displayName: 'Copy Files to: $(build.artifactstagingdirectory)'
+              inputs:
+                SourceFolder: env/eshopenv/
+                Contents: |
+                  eShopOnWeb.param.json
+                  eShopOnWebResource.json
+                TargetFolder: '$(build.artifactstagingdirectory)'
             - task: PublishBuildArtifacts@1
               displayName: 'Publish Artifact'
               inputs:
                 PathtoPublish: '$(build.artifactstagingdirectory)'
-              condition: succeededOrFailed()
+              #condition: succeededOrFailed()
+            
+            
 
   - stage: DEV
     displayName: 'DEV'
@@ -69,8 +88,8 @@ stages:
             azureSubscription: 'Visual Studio Enterprise Subscription – MPN (b6f408e9-b240-412d-b83d-1ec4fc938ee8)'
             resourceGroupName: '$(eshop_ServerName)'
             location: 'Southeast Asia'
-            csmFile: '$(System.DefaultWorkingDirectory)/_eShoponweb/env/eshopenv/eShopOnWebResource.json'
-            csmParametersFile: '$(System.DefaultWorkingDirectory)/_eShoponweb/env/eshopenv/eShopOnWeb.param.json'
+            csmFile: '$(System.DefaultWorkingDirectory)/_eShoponweb-ASP.NET Core-CI/drop/eShopOnWebResource.json'
+            csmParametersFile: '$(System.DefaultWorkingDirectory)/_eShoponweb-ASP.NET Core-CI/drop/eShopOnWeb.param.json'
             overrideParameters: '-WebsiteName $(WebsiteName) -eshop_ServerName $(eshop_ServerName)'
         
      - job: 'AppService_Deployment'
@@ -103,7 +122,7 @@ stages:
           SqlUsername: '$(DBUSER)'
           SqlPassword: '$(DBPASS)'
           deployType: SqlTask
-          SqlFile: '$(System.DefaultWorkingDirectory)/_eShoponweb/DBscripts/CatalogDB.sql'
+          SqlFile: '$(System.DefaultWorkingDirectory)/_eShoponweb-ASP.NET Core-CI/drop/CatalogDB.sql'
       
        - task: SqlAzureDacpacDeployment@1
          displayName: 'Azure SQL SqlTask'
@@ -114,7 +133,7 @@ stages:
           SqlUsername: '$(DBUSER)'
           SqlPassword: '$(DBPASS)'
           deployType: SqlTask
-          SqlFile: '$(System.DefaultWorkingDirectory)/_eShoponweb/DBscripts/IdentityDB.sql'
+          SqlFile: '$(System.DefaultWorkingDirectory)/_eShoponweb-ASP.NET Core-CI/drop/IdentityDB.sql'
      
               
               
