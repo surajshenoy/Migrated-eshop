@@ -88,8 +88,8 @@ stages:
             azureSubscription: 'Visual Studio Enterprise Subscription – MPN (b6f408e9-b240-412d-b83d-1ec4fc938ee8)'
             resourceGroupName: '$(eshop_ServerName)'
             location: 'Southeast Asia'
-            csmFile: '$(System.DefaultWorkingDirectory)/_eShoponweb-ASP.NET Core-CI/drop/eShopOnWebResource.json'
-            csmParametersFile: '$(System.DefaultWorkingDirectory)/_eShoponweb-ASP.NET Core-CI/drop/eShopOnWeb.param.json'
+            csmFile: '$(Agent.BuildDirectory)/drop/eShopOnWebResource.json'
+            csmParametersFile: '$(Agent.BuildDirectory)/drop/eShopOnWeb.param.json'
             overrideParameters: '-WebsiteName $(WebsiteName) -eshop_ServerName $(eshop_ServerName)'
         
      - job: 'AppService_Deployment'
@@ -105,7 +105,7 @@ stages:
            azureSubscription: 'Visual Studio Enterprise Subscription – MPN (b6f408e9-b240-412d-b83d-1ec4fc938ee8)'
            appType: webApp
            appName: eshop1a2b
-           package: '$(System.DefaultWorkingDirectory)/_eShoponweb-ASP.NET Core-CI/drop/Web.zip'
+           package: '$(Agent.BuildDirectory)/drop/Web.zip'
       
      - job: 'Database_Deployment'
        dependsOn:
@@ -122,7 +122,7 @@ stages:
           SqlUsername: '$(DBUSER)'
           SqlPassword: '$(DBPASS)'
           deployType: SqlTask
-          SqlFile: '$(System.DefaultWorkingDirectory)/_eShoponweb-ASP.NET Core-CI/drop/CatalogDB.sql'
+          SqlFile: '$(Agent.BuildDirectory)/drop/CatalogDB.sql'
       
        - task: SqlAzureDacpacDeployment@1
          displayName: 'Azure SQL SqlTask'
@@ -133,4 +133,4 @@ stages:
           SqlUsername: '$(DBUSER)'
           SqlPassword: '$(DBPASS)'
           deployType: SqlTask
-          SqlFile: '$(System.DefaultWorkingDirectory)/_eShoponweb-ASP.NET Core-CI/drop/IdentityDB.sql'
+          SqlFile: '$(Agent.BuildDirectory)/drop/IdentityDB.sql'
