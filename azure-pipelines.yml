@@ -4,7 +4,7 @@ pool:
   vmImage: windows-latest
 
 variables:
-  eshop_ServerName: 'Learning'
+  eshop_ServerName: 'Learning321487'
   WebsiteName: 'eshop1a2b'
   DBUSER: 'AdminUser'
   DBPASS: 'P2ssw0rd'
