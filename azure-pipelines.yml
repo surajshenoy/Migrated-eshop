@@ -1,44 +1,136 @@
 trigger: none
 
 pool:
-  name: Azure Pipelines
-#Your build pipeline references an undefined variable named ‘Parameters.RestoreBuildProjects’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab. See https://go.microsoft.com/fwlink/?linkid=865972
-#Your build pipeline references an undefined variable named ‘Parameters.RestoreBuildProjects’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab. See https://go.microsoft.com/fwlink/?linkid=865972
-#Your build pipeline references the ‘BuildConfiguration’ variable, which you’ve selected to be settable at queue time. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab, and then select the option to make it settable at queue time. See https://go.microsoft.com/fwlink/?linkid=865971
-#Your build pipeline references an undefined variable named ‘Parameters.TestProjects’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab. See https://go.microsoft.com/fwlink/?linkid=865972
-#Your build pipeline references the ‘BuildConfiguration’ variable, which you’ve selected to be settable at queue time. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab, and then select the option to make it settable at queue time. See https://go.microsoft.com/fwlink/?linkid=865971
-#Your build pipeline references the ‘BuildConfiguration’ variable, which you’ve selected to be settable at queue time. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab, and then select the option to make it settable at queue time. See https://go.microsoft.com/fwlink/?linkid=865971
+  vmImage: windows-latest
 
-steps:
-- task: DotNetCoreCLI@2
-  displayName: Restore
-  inputs:
-    command: restore
-    projects: '$(Parameters.RestoreBuildProjects)'
+variables:
+  eshop_ServerName: 'Learning'
+  WebsiteName: 'eshop1a2b'
+  DBUSER: 'AdminUser'
+  DBPASS: 'P2ssw0rd'
 
-- task: DotNetCoreCLI@2
-  displayName: Build
-  inputs:
-    projects: '$(Parameters.RestoreBuildProjects)'
-    arguments: '--configuration $(BuildConfiguration)'
+stages:
+  - stage: Build
+    displayName: 'Build'
+    jobs:
+    - deployment: Build
+      #displayName: ApprovalForPRODDeployment
+      environment: partsunlimited build
+      strategy:
+        runOnce:
+          deploy:
+            steps:
+            - checkout: self
+  
+            - task: DotNetCoreCLI@2
+              displayName: Restore
+              inputs:
+                command: restore
+                projects: '**/*.csproj'
 
-- task: DotNetCoreCLI@2
-  displayName: Test
-  inputs:
-    command: test
-    projects: '$(Parameters.TestProjects)'
-    arguments: '--configuration $(BuildConfiguration)'
+            - task: DotNetCoreCLI@2
+              displayName: Build
+              inputs:
+                projects: Everything.sln
+                arguments: '--configuration $(BuildConfiguration)'
 
-- task: DotNetCoreCLI@2
-  displayName: Publish
-  inputs:
-    command: publish
-    publishWebProjects: True
-    arguments: '--configuration $(BuildConfiguration) --output $(build.artifactstagingdirectory)'
-    zipAfterPublish: True
+            - task: DotNetCoreCLI@2
+              displayName: Test
+              inputs:
+                command: test
+                projects: '**/*[Tt]ests/*.csproj'
+                arguments: '--configuration $(BuildConfiguration)'
 
-- task: PublishBuildArtifacts@1
-  displayName: 'Publish Artifact'
-  inputs:
-    PathtoPublish: '$(build.artifactstagingdirectory)'
-  condition: succeededOrFailed()
+            - task: DotNetCoreCLI@2
+              displayName: Publish
+              inputs:
+                command: publish
+                publishWebProjects: True
+                arguments: '--configuration $(BuildConfiguration) --output $(build.artifactstagingdirectory)'
+                zipAfterPublish: True
+            
+            - task: CopyFiles@2
+              displayName: 'Copy Files to: $(build.artifactstagingdirectory)'
+              inputs:
+                SourceFolder: DBscripts/
+                Contents: |
+                  CatalogDB.sql
+                  IdentityDB.sql
+                TargetFolder: '$(build.artifactstagingdirectory)'
+            
+            - task: CopyFiles@2
+              displayName: 'Copy Files to: $(build.artifactstagingdirectory)'
+              inputs:
+                SourceFolder: env/eshopenv/
+                Contents: |
+                  eShopOnWeb.param.json
+                  eShopOnWebResource.json
+                TargetFolder: '$(build.artifactstagingdirectory)'
+            - task: PublishBuildArtifacts@1
+              displayName: 'Publish Artifact'
+              inputs:
+                PathtoPublish: '$(build.artifactstagingdirectory)'
+              #condition: succeededOrFailed()
+            
+            
+
+  - stage: DEV
+    displayName: 'DEV'
+    jobs:
+     - job: 'Creating_Infra'
+       steps:
+       - download: current
+         artifact: drop
+
+       - task: AzureResourceGroupDeployment@2
+         displayName: 'ARM Template deployment: Resource Group scope'
+         inputs:
+            azureSubscription: 'Visual Studio Enterprise Subscription – MPN (b6f408e9-b240-412d-b83d-1ec4fc938ee8)'
+            resourceGroupName: '$(eshop_ServerName)'
+            location: 'Southeast Asia'
+            csmFile: '$(System.DefaultWorkingDirectory)/_eShoponweb-ASP.NET Core-CI/drop/eShopOnWebResource.json'
+            csmParametersFile: '$(System.DefaultWorkingDirectory)/_eShoponweb-ASP.NET Core-CI/drop/eShopOnWeb.param.json'
+            overrideParameters: '-WebsiteName $(WebsiteName) -eshop_ServerName $(eshop_ServerName)'
+        
+     - job: 'AppService_Deployment'
+       dependsOn:
+         - Creating_Infra
+       steps:
+       - download: current
+         artifact: drop
+      
+       - task: AzureWebApp@1
+         displayName: 'Azure Web App Deploy: eshop1a2b'
+         inputs:
+           azureSubscription: 'Visual Studio Enterprise Subscription – MPN (b6f408e9-b240-412d-b83d-1ec4fc938ee8)'
+           appType: webApp
+           appName: eshop1a2b
+           package: '$(System.DefaultWorkingDirectory)/_eShoponweb-ASP.NET Core-CI/drop/Web.zip'
+      
+     - job: 'Database_Deployment'
+       dependsOn:
+         - AppService_Deployment
+       steps:
+       - download: current
+         artifact: drop
+       - task: SqlAzureDacpacDeployment@1
+         displayName: 'Azure SQL SqlTask'
+         inputs:
+          azureSubscription: 'Visual Studio Enterprise Subscription – MPN (b6f408e9-b240-412d-b83d-1ec4fc938ee8)'
+          ServerName: '$(eshop_ServerName).database.windows.net,1433'
+          DatabaseName: CatalogDB
+          SqlUsername: '$(DBUSER)'
+          SqlPassword: '$(DBPASS)'
+          deployType: SqlTask
+          SqlFile: '$(System.DefaultWorkingDirectory)/_eShoponweb-ASP.NET Core-CI/drop/CatalogDB.sql'
+      
+       - task: SqlAzureDacpacDeployment@1
+         displayName: 'Azure SQL SqlTask'
+         inputs:
+          azureSubscription: 'Visual Studio Enterprise Subscription – MPN (b6f408e9-b240-412d-b83d-1ec4fc938ee8)'
+          ServerName: '$(eshop_ServerName).database.windows.net,1433'
+          DatabaseName: IdentityDB
+          SqlUsername: '$(DBUSER)'
+          SqlPassword: '$(DBPASS)'
+          deployType: SqlTask
+          SqlFile: '$(System.DefaultWorkingDirectory)/_eShoponweb-ASP.NET Core-CI/drop/IdentityDB.sql'
