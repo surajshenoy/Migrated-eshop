@@ -2,43 +2,67 @@ trigger: none
 
 pool:
   vmImage: windows-latest
-#Your build pipeline references an undefined variable named ‘Parameters.RestoreBuildProjects’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab. See https://go.microsoft.com/fwlink/?linkid=865972
-#Your build pipeline references an undefined variable named ‘Parameters.RestoreBuildProjects’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab. See https://go.microsoft.com/fwlink/?linkid=865972
-#Your build pipeline references the ‘BuildConfiguration’ variable, which you’ve selected to be settable at queue time. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab, and then select the option to make it settable at queue time. See https://go.microsoft.com/fwlink/?linkid=865971
-#Your build pipeline references an undefined variable named ‘Parameters.TestProjects’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab. See https://go.microsoft.com/fwlink/?linkid=865972
-#Your build pipeline references the ‘BuildConfiguration’ variable, which you’ve selected to be settable at queue time. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab, and then select the option to make it settable at queue time. See https://go.microsoft.com/fwlink/?linkid=865971
-#Your build pipeline references the ‘BuildConfiguration’ variable, which you’ve selected to be settable at queue time. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab, and then select the option to make it settable at queue time. See https://go.microsoft.com/fwlink/?linkid=865971
 
-steps:
-- task: DotNetCoreCLI@2
-  displayName: Restore
-  inputs:
-    command: restore
-    projects: '**/*.csproj'
+stages:
+  - stage: Build
+    displayName: 'Build'
+    jobs:
+    - deployment: Build
+      #displayName: ApprovalForPRODDeployment
+      environment: partsunlimited build
+      strategy:
+        runOnce:
+          deploy:
+            steps:
+            - checkout: self
+  
+            - task: DotNetCoreCLI@2
+              displayName: Restore
+              inputs:
+                command: restore
+                projects: '**/*.csproj'
 
-- task: DotNetCoreCLI@2
-  displayName: Build
-  inputs:
-    projects: Everything.sln
-    arguments: '--configuration $(BuildConfiguration)'
+            - task: DotNetCoreCLI@2
+              displayName: Build
+              inputs:
+                projects: Everything.sln
+                arguments: '--configuration $(BuildConfiguration)'
 
-- task: DotNetCoreCLI@2
-  displayName: Test
-  inputs:
-    command: test
-    projects: '**/*[Tt]ests/*.csproj'
-    arguments: '--configuration $(BuildConfiguration)'
+            - task: DotNetCoreCLI@2
+              displayName: Test
+              inputs:
+                command: test
+                projects: '**/*[Tt]ests/*.csproj'
+                arguments: '--configuration $(BuildConfiguration)'
 
-- task: DotNetCoreCLI@2
-  displayName: Publish
-  inputs:
-    command: publish
-    publishWebProjects: True
-    arguments: '--configuration $(BuildConfiguration) --output $(build.artifactstagingdirectory)'
-    zipAfterPublish: True
+            - task: DotNetCoreCLI@2
+              displayName: Publish
+              inputs:
+                command: publish
+                publishWebProjects: True
+                arguments: '--configuration $(BuildConfiguration) --output $(build.artifactstagingdirectory)'
+                zipAfterPublish: True
 
-- task: PublishBuildArtifacts@1
-  displayName: 'Publish Artifact'
-  inputs:
-    PathtoPublish: '$(build.artifactstagingdirectory)'
-  condition: succeededOrFailed()
+            - task: PublishBuildArtifacts@1
+              displayName: 'Publish Artifact'
+              inputs:
+                PathtoPublish: '$(build.artifactstagingdirectory)'
+              condition: succeededOrFailed()
+
+  - stage: DEV
+    displayName: 'DEV'
+    jobs:
+     - job: Creating Infra
+       steps:
+        - task: AzureResourceGroupDeployment@2
+          displayName: 'ARM Template deployment: Resource Group scope'
+          inputs:
+            azureSubscription: 'Visual Studio Enterprise Subscription – MPN (b6f408e9-b240-412d-b83d-1ec4fc938ee8)'
+            resourceGroupName: '$(eshop_ServerName)'
+            location: 'Southeast Asia'
+            csmFile: '$(System.DefaultWorkingDirectory)/_eShoponweb/env/eshopenv/eShopOnWebResource.json'
+            csmParametersFile: '$(System.DefaultWorkingDirectory)/_eShoponweb/env/eshopenv/eShopOnWeb.param.json'
+            overrideParameters: '-WebsiteName $(WebsiteName) -eshop_ServerName $(eshop_ServerName)'
+     
+              
+              
