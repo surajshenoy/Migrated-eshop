@@ -134,6 +134,3 @@ stages:
           SqlPassword: '$(DBPASS)'
           deployType: SqlTask
           SqlFile: '$(Agent.BuildDirectory)/drop/IdentityDB.sql'
-     
-              
-              
