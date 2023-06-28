@@ -52,7 +52,7 @@ stages:
   - stage: DEV
     displayName: 'DEV'
     jobs:
-     - job: Creating Infra
+     - job: 'Creating_Infra'
        steps:
         - task: AzureResourceGroupDeployment@2
           displayName: 'ARM Template deployment: Resource Group scope'
@@ -63,6 +63,40 @@ stages:
             csmFile: '$(System.DefaultWorkingDirectory)/_eShoponweb/env/eshopenv/eShopOnWebResource.json'
             csmParametersFile: '$(System.DefaultWorkingDirectory)/_eShoponweb/env/eshopenv/eShopOnWeb.param.json'
             overrideParameters: '-WebsiteName $(WebsiteName) -eshop_ServerName $(eshop_ServerName)'
+        
+     - job: 'AppService_Deployment'
+       steps:
+         - task: AzureWebApp@1
+           displayName: 'Azure Web App Deploy: eshop1a2b'
+           inputs:
+            azureSubscription: 'Visual Studio Enterprise Subscription – MPN (b6f408e9-b240-412d-b83d-1ec4fc938ee8)'
+            appType: webApp
+            appName: eshop1a2b
+            package: '$(System.DefaultWorkingDirectory)/_eShoponweb-ASP.NET Core-CI/drop/Web.zip'
+      
+     - job: 'Database_Deployment'
+       steps:
+       - task: SqlAzureDacpacDeployment@1
+         displayName: 'Azure SQL SqlTask'
+         inputs:
+          azureSubscription: 'Visual Studio Enterprise Subscription – MPN (b6f408e9-b240-412d-b83d-1ec4fc938ee8)'
+          ServerName: '$(eshop_ServerName).database.windows.net,1433'
+          DatabaseName: CatalogDB
+          SqlUsername: '$(DBUSER)'
+          SqlPassword: '$(DBPASS)'
+          deployType: SqlTask
+          SqlFile: '$(System.DefaultWorkingDirectory)/_eShoponweb/DBscripts/CatalogDB.sql'
+      
+       - task: SqlAzureDacpacDeployment@1
+         displayName: 'Azure SQL SqlTask'
+         inputs:
+          azureSubscription: 'Visual Studio Enterprise Subscription – MPN (b6f408e9-b240-412d-b83d-1ec4fc938ee8)'
+          ServerName: '$(eshop_ServerName).database.windows.net,1433'
+          DatabaseName: IdentityDB
+          SqlUsername: '$(DBUSER)'
+          SqlPassword: '$(DBPASS)'
+          deployType: SqlTask
+          SqlFile: '$(System.DefaultWorkingDirectory)/_eShoponweb/DBscripts/IdentityDB.sql'
      
               
               
