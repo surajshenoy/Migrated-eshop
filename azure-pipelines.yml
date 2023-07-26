@@ -9,7 +9,7 @@ stages:
     jobs:
     - deployment: Build
       #displayName: ApprovalForPRODDeployment
-      environment: eShoponweb build
+      environment: eshoponweb build
       strategy:
         runOnce:
           deploy:
