@@ -8,8 +8,7 @@ stages:
     displayName: 'Build'
     jobs:
     - deployment: Build
-      #displayName: ApprovalForPRODDeployment
-      environment: partsunlimited build
+      environment: eShopOn build
       strategy:
         runOnce:
           deploy:
