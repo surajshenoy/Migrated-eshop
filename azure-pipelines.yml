@@ -86,7 +86,7 @@ stages:
               #condition: succeededOrFailed()
 
   - stage: DEV
-    displayName: 'DEV'
+    displayName: 'Deployment to DEV'
     jobs:
      - job: 'Creating_Infra'
        steps:
