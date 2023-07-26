@@ -8,7 +8,7 @@ stages:
     displayName: 'Build'
     jobs:
     - deployment: Build
-      environment: eShopOn build
+      environment: eshoponweb build
       strategy:
         runOnce:
           deploy:
