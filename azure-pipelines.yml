@@ -99,30 +99,30 @@ stages:
            appName: eshop1a2b
            package: '$(Agent.BuildDirectory)/drop/Web.zip'
       
-     - job: 'Database_Deployment'
-       dependsOn:
-         - AppService_Deployment
-       steps:
-       - download: current
-         artifact: drop
-       - task: SqlAzureDacpacDeployment@1
-         displayName: 'Azure SQL SqlTask'
-         inputs:
-          azureSubscription: 'Visual Studio Enterprise Subscription – MPN (b6f408e9-b240-412d-b83d-1ec4fc938ee8)'
-          ServerName: '$(eshop_ServerName).database.windows.net,1433'
-          DatabaseName: CatalogDB
-          SqlUsername: '$(DBUSER)'
-          SqlPassword: '$(DBPASS)'
-          deployType: SqlTask
-          SqlFile: '$(Agent.BuildDirectory)/drop/CatalogDB.sql'
+    #  - job: 'Database_Deployment'
+    #    dependsOn:
+    #      - AppService_Deployment
+    #    steps:
+    #    - download: current
+    #      artifact: drop
+      #  - task: SqlAzureDacpacDeployment@1
+      #    displayName: 'Azure SQL SqlTask'
+      #    inputs:
+      #     azureSubscription: 'Visual Studio Enterprise Subscription – MPN (b6f408e9-b240-412d-b83d-1ec4fc938ee8)'
+      #     ServerName: '$(eshop_ServerName).database.windows.net,1433'
+      #     DatabaseName: CatalogDB
+      #     SqlUsername: '$(DBUSER)'
+      #     SqlPassword: '$(DBPASS)'
+      #     deployType: SqlTask
+      #     SqlFile: '$(Agent.BuildDirectory)/drop/CatalogDB.sql'
       
-       - task: SqlAzureDacpacDeployment@1
-         displayName: 'Azure SQL SqlTask'
-         inputs:
-          azureSubscription: 'Visual Studio Enterprise Subscription – MPN (b6f408e9-b240-412d-b83d-1ec4fc938ee8)'
-          ServerName: '$(eshop_ServerName).database.windows.net,1433'
-          DatabaseName: IdentityDB
-          SqlUsername: '$(DBUSER)'
-          SqlPassword: '$(DBPASS)'
-          deployType: SqlTask
-          SqlFile: '$(Agent.BuildDirectory)/drop/IdentityDB.sql'
+      #  - task: SqlAzureDacpacDeployment@1
+      #    displayName: 'Azure SQL SqlTask'
+      #    inputs:
+      #     azureSubscription: 'Visual Studio Enterprise Subscription – MPN (b6f408e9-b240-412d-b83d-1ec4fc938ee8)'
+      #     ServerName: '$(eshop_ServerName).database.windows.net,1433'
+      #     DatabaseName: IdentityDB
+      #     SqlUsername: '$(DBUSER)'
+      #     SqlPassword: '$(DBPASS)'
+      #     deployType: SqlTask
+      #     SqlFile: '$(Agent.BuildDirectory)/drop/IdentityDB.sql'
