@@ -66,6 +66,7 @@ stages:
               #condition: succeededOrFailed()
 
   - stage: DEV
+    condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
     displayName: 'Deployment'
     jobs:
      - job: 'Creating_Infra'
