@@ -51,7 +51,8 @@
         }
     },
     "variables": {
-        "eShop_ServerName": "[toLower(parameters('eshop_ServerName'))]"
+        "eShop_ServerName": "[toLower(parameters('eshop_ServerName'))]",
+        "testsiteName": "[concat (toLower(parameters('WebsiteName')),'-test')]"
     },
     "resources": [
         {
@@ -126,6 +127,18 @@
             },
             "properties": {
                 "ApplicationId": "[concat(parameters('WebsiteName'), '-Insights')]"
+            }
+        },
+        {
+            "name": "[concat(variables('testsiteName'), '-Insights')]",
+            "type": "Microsoft.Insights/components",
+            "location": "eastus",
+            "apiVersion": "2014-04-01",
+            "tags": {
+                "displayName": "insightsComponents"
+            },
+            "properties": {
+                "ApplicationId": "[concat(variables('testsiteName'), '-Insights')]"
             }
         },
         {
@@ -258,7 +271,56 @@
                         "Keys:ApplicationInsights:InstrumentationKey": "[reference(concat('Microsoft.Insights/components/', parameters('WebsiteName'), '-Insights')).InstrumentationKey]"
                     }
                 }
-
+            ]
+        },
+        {
+            "name": "[variables('testsiteName')]",
+            "type": "Microsoft.Web/sites",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/serverfarms', parameters('eshop_HostingPlanName'))]",
+                "[resourceId('Microsoft.Sql/servers', variables('eShop_ServerName'))]",
+                "[resourceId('Microsoft.Insights/components', concat(variables('testsiteName'), '-Insights'))]"
+            ],
+            "location": "[resourceGroup().location]",
+            "apiVersion": "2014-06-01",
+            "tags": {
+                "[concat('hidden-related:', resourceGroup().id, '/providers/Microsoft.Web/serverfarms/', parameters('eshop_HostingPlanName'))]": "Resource",
+                "displayName": "eShopWebsite"
+            },
+            "properties": {
+                "name": "[variables('testsiteName')]",
+                "serverFarm": "[parameters('eshop_HostingPlanName')]"
+            },
+            "resources": [
+                {
+                    "name": "connectionstrings",
+                    "type": "config",
+                    "apiVersion": "2014-11-01",
+                    "dependsOn": [
+                        "[resourceId('Microsoft.Web/sites/', variables('testsiteName'))]"
+                    ],
+                    "properties": {
+                        "CatalogConnection": {
+                            "value": "[concat('Data Source=tcp:', reference(concat('Microsoft.Sql/servers/', variables('eShop_ServerName'))).fullyQualifiedDomainName, ',1433;Initial Catalog=', parameters('eshop_DBName_Catalog'), ';User Id=', parameters ('eshop_DBLogin'), '@', variables('eShop_ServerName'), ';Password=', parameters('eshop_DBPassword'), ';')]",
+                            "type": "SQLAzure"
+                        },
+                        "IdentityConnection": {
+                            "value": "[concat('Data Source=tcp:', reference(concat('Microsoft.Sql/servers/', variables('eShop_ServerName'))).fullyQualifiedDomainName, ',1433;Initial Catalog=', parameters('eshop_DBName_Identity'), ';User Id=', parameters ('eshop_DBLogin'), '@', variables('eShop_ServerName'), ';Password=', parameters('eshop_DBPassword'), ';')]",
+                            "type": "SQLAzure"
+                        }
+                    }
+                },
+                {
+                    "name": "appsettings",
+                    "type": "config",
+                    "apiVersion": "2014-11-01",
+                    "dependsOn": [
+                        "[resourceId('Microsoft.Web/sites', variables('testsiteName'))]"
+                    ],
+                    "properties": {
+                        "Keys:ApplicationInsights:InstrumentationKey": "[reference(concat('Microsoft.Insights/components/', variables('testsiteName'), '-Insights')).InstrumentationKey]"
+                    }
+                }
             ]
         }
 
