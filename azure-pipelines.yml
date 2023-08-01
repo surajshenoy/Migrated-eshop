@@ -111,8 +111,7 @@ stages:
 
       environment: 
         name: 'Production'
-        resourceName: 'Azure App service'
-      
+              
       strategy:
        runOnce:
          deploy:
