@@ -105,7 +105,7 @@ stages:
 
   - stage: Production
     dependsOn: DEV
-    # condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
+    condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
     displayName: Production Deployment
     jobs: 
     - deployment: DeployWeb
