@@ -10,9 +10,10 @@ stages:
         ${{ pair.key }}: ${{ pair.value }}
     jobs:
     - ${{ each job in stage.jobs }}:
-      - ${{ each pair2 in job }}:
-          ${{ if ne(pair2.key, 'steps') }}:
-            ${{ pair2.key }}: ${{ pair2.value }}
-        steps:
-        - task: ComplianceCheck@1
-        - ${{ job.steps }}
+      - ${{ if eq(job.name, 'job') }}:
+        - ${{ each pair2 in job }}:
+            ${{ if ne(pair2.key, 'steps') }}:
+              ${{ pair2.key }}: ${{ pair2.value }}
+          steps:
+          - task: ComplianceCheck@1
+          - ${{ job.steps }}
