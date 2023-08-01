@@ -68,6 +68,7 @@ stages:
               #condition: succeededOrFailed()
 
   - stage: DEV
+    dependsOn: Build
     condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
     displayName: 'Deployment'
     jobs:
@@ -103,7 +104,8 @@ stages:
            
 
   - stage: Production
-    condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
+    dependsOn: DEV
+    # condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
     displayName: Production Deployment
     jobs: 
     - deployment: DeployWeb
@@ -111,7 +113,7 @@ stages:
 
       environment: 
         name: 'Production'
-              
+
       strategy:
        runOnce:
          deploy:
