@@ -68,8 +68,9 @@ stages:
               #condition: succeededOrFailed()
 
   - stage: DEV
+    dependsOn: Build
     condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
-    displayName: 'Deployment'
+    displayName: 'DEV Deployment'
     jobs:
      - job: 'Creating_Infra'
        steps:
@@ -98,33 +99,33 @@ stages:
          inputs:
            azureSubscription: 'Visual Studio Enterprise Subscription – MPN (b6f408e9-b240-412d-b83d-1ec4fc938ee8)'
            appType: webApp
-           appName: eshop1a2b
+           appName: $(WebsiteName)-test
            package: '$(Agent.BuildDirectory)/drop/Web.zip'
-      
-    #  - job: 'Database_Deployment'
-    #    dependsOn:
-    #      - AppService_Deployment
-    #    steps:
-    #    - download: current
-    #      artifact: drop
-      #  - task: SqlAzureDacpacDeployment@1
-      #    displayName: 'Azure SQL SqlTask'
-      #    inputs:
-      #     azureSubscription: 'Visual Studio Enterprise Subscription – MPN (b6f408e9-b240-412d-b83d-1ec4fc938ee8)'
-      #     ServerName: '$(eshop_ServerName).database.windows.net,1433'
-      #     DatabaseName: CatalogDB
-      #     SqlUsername: '$(DBUSER)'
-      #     SqlPassword: '$(DBPASS)'
-      #     deployType: SqlTask
-      #     SqlFile: '$(Agent.BuildDirectory)/drop/CatalogDB.sql'
-      
-      #  - task: SqlAzureDacpacDeployment@1
-      #    displayName: 'Azure SQL SqlTask'
-      #    inputs:
-      #     azureSubscription: 'Visual Studio Enterprise Subscription – MPN (b6f408e9-b240-412d-b83d-1ec4fc938ee8)'
-      #     ServerName: '$(eshop_ServerName).database.windows.net,1433'
-      #     DatabaseName: IdentityDB
-      #     SqlUsername: '$(DBUSER)'
-      #     SqlPassword: '$(DBPASS)'
-      #     deployType: SqlTask
-      #     SqlFile: '$(Agent.BuildDirectory)/drop/IdentityDB.sql'
+           
+
+  - stage: Production
+    dependsOn: DEV
+    condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
+    displayName: Production Deployment
+    jobs: 
+    - deployment: DeployWeb
+      displayName: deploy Web App
+
+      environment: 
+        name: 'Production'
+
+      strategy:
+       runOnce:
+         deploy:
+           steps:
+             - download: current
+               artifact: drop
+            
+             - task: AzureWebApp@1
+               displayName: 'Production Deployment'
+               inputs:
+                  azureSubscription: 'Visual Studio Enterprise Subscription – MPN (b6f408e9-b240-412d-b83d-1ec4fc938ee8)'
+                  appType: webApp
+                  appName: $(WebsiteName)
+                  package: '$(Agent.BuildDirectory)/drop/Web.zip'
+                  
