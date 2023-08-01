@@ -70,7 +70,7 @@ stages:
   - stage: DEV
     dependsOn: Build
     condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
-    displayName: 'Deployment'
+    displayName: 'DEV Deployment'
     jobs:
      - job: 'Creating_Infra'
        steps:
