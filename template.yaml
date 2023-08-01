@@ -1,0 +1,18 @@
+parameters:
+- name: 'stages'
+  type: stageList
+  default: []
+
+stages:
+- ${{ each stage in parameters.stages }}:
+  - ${{ each pair in stage }}:
+      ${{ if ne(pair.key, 'jobs') }}:
+        ${{ pair.key }}: ${{ pair.value }}
+    jobs:
+    - ${{ each job in pair.value }}:
+      - ${{ each pair2 in job }}:
+          ${{ if ne(pair2.key, 'steps') }}:
+            ${{ pair2.key }}: ${{ pair2.value }}
+        steps:
+        - task: ComplianceCheck@1
+        - ${{ job.steps }}
