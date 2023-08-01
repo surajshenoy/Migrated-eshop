@@ -109,7 +109,7 @@ extends:
               
 
       - stage: Production
-        dependsOn: DEV
+        dependsOn: Test
         condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
         displayName: Production Deployment
         jobs: 
