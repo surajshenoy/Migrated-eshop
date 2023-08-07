@@ -65,7 +65,19 @@ extends:
             #condition: succeededOrFailed()
 
           - task: AdvancedSecurity-Dependency-Scanning@1
+
+          - task: AdvancedSecurity-Codeql-Init@1
+            inputs:
+              languages: 'csharp, javascript'
           
+          - task: AdvancedSecurity-Codeql-Autobuild@1
+
+          - task: AdvancedSecurity-Codeql-Analyze@1
+            inputs:
+              querysuite: 'default'
+          
+          - task: AdvancedSecurity-Publish@1
+
       - stage: Test
         dependsOn: Build
         condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
