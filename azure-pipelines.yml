@@ -64,6 +64,8 @@ extends:
               PathtoPublish: '$(build.artifactstagingdirectory)'
             #condition: succeededOrFailed()
 
+          - task: AdvancedSecurity-Dependency-Scanning@1
+          
       - stage: Test
         dependsOn: Build
         condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
