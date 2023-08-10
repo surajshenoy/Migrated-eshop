@@ -87,7 +87,7 @@ extends:
         - deployment: DeployWeb
           dependsOn:
           - Creating_Infra
-          displayName: Deploy Web App
+          displayName: Deploy to Test Environment
 
           environment: 
             name: 'Test'
@@ -114,7 +114,7 @@ extends:
         displayName: Production Deployment
         jobs: 
         - deployment: DeployWeb
-          displayName: Deploy Web App
+          displayName: Deploy to Production Environment
 
           environment: 
             name: 'Production'
