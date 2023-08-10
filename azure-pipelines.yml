@@ -92,7 +92,7 @@ extends:
             displayName: 'ARM Template deployment: Resource Group scope'
             inputs:
               azureSubscription: 'Visual Studio Enterprise Subscription – MPN (b6f408e9-b240-412d-b83d-1ec4fc938ee8)'
-              resourceGroupName: '$(eshop_ServerName)'
+              resourceGroupName: '$(rg_name)'
               location: 'Southeast Asia'
               csmFile: '$(Agent.BuildDirectory)/drop/eShopOnWebResource.json'
               csmParametersFile: '$(Agent.BuildDirectory)/drop/eShopOnWeb.param.json'
