@@ -18,12 +18,24 @@ extends:
               command: restore
               projects: '**/*.csproj'
 
+
+          - task: AdvancedSecurity-Codeql-Init@1
+            inputs:
+              languages: 'csharp'
+
           - task: DotNetCoreCLI@2
             displayName: Build
             inputs:
               projects: Everything.sln
               arguments: '--configuration $(BuildConfiguration)'
 
+          - task: AdvancedSecurity-Dependency-Scanning@1
+
+          - task: AdvancedSecurity-Codeql-Analyze@1
+            inputs:
+              querysuite: 'default'
+                    
+          - task: AdvancedSecurity-Publish@1
           - task: DotNetCoreCLI@2
             condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
             displayName: Test
@@ -63,6 +75,8 @@ extends:
             inputs:
               PathtoPublish: '$(build.artifactstagingdirectory)'
             #condition: succeededOrFailed()
+         
+          
 
       - stage: Test
         dependsOn: Build
