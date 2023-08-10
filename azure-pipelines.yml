@@ -13,7 +13,7 @@ extends:
           - checkout: self
 
           - task: DotNetCoreCLI@2
-            displayName: Restore
+            displayName: Restore 
             inputs:
               command: restore
               projects: '**/*.csproj'
@@ -87,7 +87,7 @@ extends:
         - deployment: DeployWeb
           dependsOn:
           - Creating_Infra
-          displayName: deploy Web App
+          displayName: Deploy Web App
 
           environment: 
             name: 'Test'
@@ -114,7 +114,7 @@ extends:
         displayName: Production Deployment
         jobs: 
         - deployment: DeployWeb
-          displayName: deploy Web App
+          displayName: Deploy Web App
 
           environment: 
             name: 'Production'
