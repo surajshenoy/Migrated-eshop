@@ -84,7 +84,6 @@ extends:
 
       - stage: Test
         dependsOn: Build
-        condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
         displayName: 'Test Deployment'
         jobs:
         - job: 'Creating_Infra'
