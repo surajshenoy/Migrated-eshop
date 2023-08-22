@@ -41,7 +41,6 @@ extends:
           - task: AdvancedSecurity-Publish@1
             condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
           - task: DotNetCoreCLI@2
-            condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
             displayName: Test
             inputs:
               command: test
@@ -83,6 +82,7 @@ extends:
           
 
       - stage: Test
+        condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
         dependsOn: Build
         displayName: 'Test Deployment'
         jobs:
