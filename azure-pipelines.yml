@@ -20,6 +20,7 @@ extends:
 
 
           - task: AdvancedSecurity-Codeql-Init@1
+            condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
             inputs:
               languages: 'csharp'
 
@@ -30,12 +31,15 @@ extends:
               arguments: '--configuration $(BuildConfiguration)'
 
           - task: AdvancedSecurity-Dependency-Scanning@1
+            condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
 
           - task: AdvancedSecurity-Codeql-Analyze@1
+            condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
             inputs:
               querysuite: 'default'
                     
           - task: AdvancedSecurity-Publish@1
+            condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
           - task: DotNetCoreCLI@2
             condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
             displayName: Test
