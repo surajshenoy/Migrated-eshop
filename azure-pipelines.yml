@@ -40,13 +40,13 @@ extends:
                     
           - task: AdvancedSecurity-Publish@1
             condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
+
           - task: DotNetCoreCLI@2
             displayName: Test
             inputs:
               command: test
               projects: '$(Parameters.TestProjects)'
               arguments: '--configuration $(BuildConfiguration) --collect:"Code coverage"'
-          
 
           - task: PublishCodeCoverageResults@1
             displayName: 'Publish code coverage from $(Agent.TempDirectory)/**/coverage.cobertura.xml'
