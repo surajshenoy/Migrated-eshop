@@ -45,7 +45,7 @@ extends:
             displayName: Test
             inputs:
               command: test
-              projects: '$(Parameters.TestProjects)'
+              projects: '**/*[Tt]ests/*.csproj'
               arguments: '--configuration $(BuildConfiguration) --collect:"Code coverage"'
 
           - task: PublishCodeCoverageResults@1
